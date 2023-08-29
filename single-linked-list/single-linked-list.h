@@ -214,14 +214,14 @@ public:
 	// Если список пустой, возвращённый итератор будет равен end()
 	// Результат вызова эквивалентен вызову метода cbegin()
 	[[nodiscard]] ConstIterator begin() const noexcept {
-		return ConstIterator(head_.next_node);
+		return cbegin();
 	}
 
 	// Возвращает константный итератор, указывающий на позицию, следующую за последним элементом односвязного списка
 	// Разыменовывать этот итератор нельзя - попытка разыменования приведёт к неопределённому поведению
 	// Результат вызова эквивалентен вызову метода cend()
 	[[nodiscard]] ConstIterator end() const noexcept {
-		return ConstIterator();
+		return cend();
 	}
 
 	// Возвращает константный итератор, ссылающийся на первый элемент
@@ -260,6 +260,7 @@ public:
 	 * Если при создании элемента будет выброшено исключение, список останется в прежнем состоянии
 	 */
 	Iterator InsertAfter(ConstIterator pos, const Type& value) {
+		assert(pos.node_);
 		assert(pos != end());
 		Node* next = new Node(value, pos.node_->next_node);
 		//Меняем ссылку на узел, содержащуюся в pos
@@ -274,7 +275,9 @@ public:
 	 * Возвращает итератор на элемент, следующий за удалённым
 	 */
 	Iterator EraseAfter(ConstIterator pos) noexcept {
-		assert(pos.node_ != nullptr);
+		assert(size_ > 0);
+		assert(pos.node_);
+		assert(pos.node_->next_node);
 		//Запомним ссылку на узел после pos
 		Node* next = pos.node_->next_node;
 		//Запомним ссылку на узел после next
@@ -316,6 +319,13 @@ private:
 template<typename Type>
 bool operator==(const SingleLinkedList<Type>& lhs,
 	const SingleLinkedList<Type>& rhs) {
+
+	//Checking size of the lists
+	if (lhs.GetSize() != rhs.GetSize()) return false;
+	
+	//checking whether the objects are the same
+	if (lhs.begin() == rhs.begin()) return true;
+
 	return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs),
 		std::end(lhs));
 }
@@ -355,3 +365,4 @@ template<typename Type>
 void swap(SingleLinkedList<Type>& lhs, SingleLinkedList<Type>& rhs) noexcept {
 	lhs.swap(rhs);
 }
+
